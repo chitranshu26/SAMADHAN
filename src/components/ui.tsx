@@ -9,7 +9,18 @@ export type Row = Record<string, any>;
 export async function api<T = any>(path: string, body?: unknown, method?: string): Promise<T> {
   const response = await fetch(path, { method: method || (body === undefined ? "GET" : "POST"), credentials: "same-origin", headers: body instanceof FormData ? undefined : { "Content-Type": "application/json" }, body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body) });
   const contentType = response.headers.get("content-type") || "";
-  const data = contentType.includes("application/json") ? await response.json() : { error: await response.text() };
+  let data: any;
+  if (contentType.includes("application/json")) {
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error(`Server returned an invalid response (${response.status}). Please try again later.`);
+    }
+  } else {
+    const text = await response.text();
+    const isHtml = contentType.includes("text/html") || /^\s*(<!doctype html|<html)/i.test(text);
+    data = { error: isHtml ? `Server error (${response.status}). Please try again later.` : text.slice(0, 500) };
+  }
   if (!response.ok) throw new Error(data.error || data.message || `Request failed (${response.status})`);
   return data;
 }
