@@ -11,6 +11,13 @@ playwright-report/
 .data/postgres/
 .data/postgres-recovered/
 .data/postgres-unavailable-*/
+.data/import/SOURCE_README.md
+.data/import/database-*.json
+.data/import/database-failed-rows.jsonl
+.data/import/failed-rows.jsonl
+.data/import/progress.json
+.data/import/selected-complaints.txt
+.data/import/source-manifest.json
 __pycache__/
 .vercel/
 !.github/
