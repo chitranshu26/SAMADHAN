@@ -1,0 +1,64 @@
+{
+  "name": "samadhan-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "db:setup": "tsx scripts/seed-demo-users/setup.ts",
+    "data:load": "tsx scripts/import-dataset/load.ts",
+    "data:prepare": "py scripts/import-dataset/prepare.py",
+    "demo:credentials": "node scripts/show-demo-credentials.mjs"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "latest",
+    "@hookform/resolvers": "latest",
+    "@radix-ui/react-dialog": "latest",
+    "@radix-ui/react-dropdown-menu": "latest",
+    "@radix-ui/react-tooltip": "latest",
+    "@supabase/ssr": "latest",
+    "@supabase/supabase-js": "latest",
+    "@tanstack/react-query": "latest",
+    "clsx": "latest",
+    "csv-parse": "latest",
+    "date-fns": "latest",
+    "dotenv": "latest",
+    "echarts": "latest",
+    "echarts-for-react": "latest",
+    "exceljs": "^4.4.0",
+    "lucide-react": "latest",
+    "motion": "latest",
+    "next": "latest",
+    "nodemailer": "latest",
+    "pdfkit": "latest",
+    "pg": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-hook-form": "latest",
+    "tailwind-merge": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@playwright/test": "latest",
+    "@tailwindcss/postcss": "latest",
+    "@types/node": "latest",
+    "@types/nodemailer": "latest",
+    "@types/pdfkit": "latest",
+    "@types/pg": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "tailwindcss": "latest",
+    "tsx": "latest",
+    "typescript": "latest",
+    "vitest": "latest"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
+  }
+}

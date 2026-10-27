@@ -1,0 +1,272 @@
+{
+  "model_version": "lexical-logreg-v1",
+  "model_type": "scikit-learn LogisticRegression + StandardScaler + training-fold TF-IDF",
+  "synthetic_not_official": true,
+  "training_pairs": 21665,
+  "feature_names": [
+    "same_institution",
+    "same_complainant",
+    "same_category",
+    "same_subcategory",
+    "date_proximity",
+    "date_within_7_days",
+    "word_jaccard",
+    "token_cosine",
+    "character_trigram_dice",
+    "tfidf_cosine",
+    "exact_description",
+    "cross_bureau",
+    "same_incident_cluster",
+    "length_ratio",
+    "title_jaccard"
+  ],
+  "split_method": "Connected components of all candidate pair endpoints and known incident clusters; grouped 70/15/15 holdout, seeds 47/48",
+  "split_counts": {
+    "train": 15148,
+    "validation": 3250,
+    "test": 3267
+  },
+  "unique_complaints": 40115,
+  "leaked_complaint_ids": 0,
+  "leaked_incident_components": 0,
+  "training_missing_cluster_augmentation": "A second view of training rows with cluster agreement unknown/zero, weighted 0.35; holdouts are untouched.",
+  "simulated_similarity_features_used": false,
+  "validation": {
+    "rows": 3250,
+    "accuracy": 0.8196923076923077,
+    "macro_f1": 0.8340993847360773,
+    "weighted_f1": 0.8205303974663205,
+    "classification_report": {
+      "CROSS_BUREAU_OVERLAP": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 526.0
+      },
+      "EXACT_DUPLICATE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 381.0
+      },
+      "INDEPENDENT": {
+        "precision": 0.43023255813953487,
+        "recall": 0.5169660678642715,
+        "f1-score": 0.4696282864913871,
+        "support": 501.0
+      },
+      "NEAR_DUPLICATE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 501.0
+      },
+      "SAME_INCIDENT_DISTINCT_PEOPLE": {
+        "precision": 0.9954614220877458,
+        "recall": 1.0,
+        "f1-score": 0.9977255496588324,
+        "support": 658.0
+      },
+      "SAME_INSTITUTION_ONLY": {
+        "precision": 0.5854922279792746,
+        "recall": 0.49633967789165445,
+        "f1-score": 0.5372424722662441,
+        "support": 683.0
+      },
+      "accuracy": 0.8196923076923077,
+      "macro avg": {
+        "precision": 0.8351977013677593,
+        "recall": 0.8355509576259877,
+        "f1-score": 0.8340993847360773,
+        "support": 3250.0
+      },
+      "weighted avg": {
+        "precision": 0.8241388674066118,
+        "recall": 0.8196923076923077,
+        "f1-score": 0.8205303974663205,
+        "support": 3250.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        526,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        381,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        259,
+        0,
+        2,
+        240
+      ],
+      [
+        0,
+        0,
+        0,
+        501,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        658,
+        0
+      ],
+      [
+        0,
+        0,
+        343,
+        0,
+        1,
+        339
+      ]
+    ],
+    "labels": [
+      "CROSS_BUREAU_OVERLAP",
+      "EXACT_DUPLICATE",
+      "INDEPENDENT",
+      "NEAR_DUPLICATE",
+      "SAME_INCIDENT_DISTINCT_PEOPLE",
+      "SAME_INSTITUTION_ONLY"
+    ]
+  },
+  "test": {
+    "rows": 3267,
+    "accuracy": 0.8148148148148148,
+    "macro_f1": 0.8291154560399333,
+    "weighted_f1": 0.8147913825507497,
+    "classification_report": {
+      "CROSS_BUREAU_OVERLAP": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 504.0
+      },
+      "EXACT_DUPLICATE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 412.0
+      },
+      "INDEPENDENT": {
+        "precision": 0.4382716049382716,
+        "recall": 0.5419847328244275,
+        "f1-score": 0.48464163822525597,
+        "support": 524.0
+      },
+      "NEAR_DUPLICATE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 518.0
+      },
+      "SAME_INCIDENT_DISTINCT_PEOPLE": {
+        "precision": 0.9969418960244648,
+        "recall": 1.0,
+        "f1-score": 0.998468606431853,
+        "support": 652.0
+      },
+      "SAME_INSTITUTION_ONLY": {
+        "precision": 0.5499058380414312,
+        "recall": 0.4444444444444444,
+        "f1-score": 0.49158249158249157,
+        "support": 657.0
+      },
+      "accuracy": 0.8148148148148148,
+      "macro avg": {
+        "precision": 0.8308532231673613,
+        "recall": 0.8310715295448121,
+        "f1-score": 0.8291154560399333,
+        "support": 3267.0
+      },
+      "weighted avg": {
+        "precision": 0.8187782591946208,
+        "recall": 0.8148148148148148,
+        "f1-score": 0.8147913825507497,
+        "support": 3267.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        504,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        412,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        284,
+        0,
+        1,
+        239
+      ],
+      [
+        0,
+        0,
+        0,
+        518,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        652,
+        0
+      ],
+      [
+        0,
+        0,
+        364,
+        0,
+        1,
+        292
+      ]
+    ],
+    "labels": [
+      "CROSS_BUREAU_OVERLAP",
+      "EXACT_DUPLICATE",
+      "INDEPENDENT",
+      "NEAR_DUPLICATE",
+      "SAME_INCIDENT_DISTINCT_PEOPLE",
+      "SAME_INSTITUTION_ONLY"
+    ]
+  },
+  "limitations": [
+    "Ground truth and narratives are synthetic, largely template based, and do not establish real-world performance.",
+    "Known incident-cluster agreement is a useful feature for imported cases. Newly submitted cases lack confirmed clusters until human review and can have lower overlap recall.",
+    "Semantic embedding service is not configured; real TF-IDF, token and character features provide the lexical fallback.",
+    "Attachment hashes are not used in training because source hashes are simulated; no simulated similarity scores are passed to live inference.",
+    "Same institution alone is never a duplicate decision. Officers adjudicate suggestions; no complaint is deleted."
+  ],
+  "trained_at_utc": "2026-10-27T20:48:54.784861+00:00"
+}
