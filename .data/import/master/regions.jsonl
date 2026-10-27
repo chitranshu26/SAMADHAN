@@ -1,0 +1,8 @@
+{"region_id":"CRO","region_name":"Central Region","office_city":"Bhopal","source_type":"synthetic seed referencing legacy region nomenclature","as_of_date":"2026-10-27","current_mapping_verified":false}
+{"region_id":"ERO","region_name":"Eastern Region","office_city":"Kolkata","source_type":"synthetic seed referencing legacy region nomenclature","as_of_date":"2026-10-27","current_mapping_verified":false}
+{"region_id":"NRO","region_name":"Northern Region","office_city":"Kanpur","source_type":"synthetic seed referencing legacy region nomenclature","as_of_date":"2026-10-27","current_mapping_verified":false}
+{"region_id":"NWRO","region_name":"North-Western Region","office_city":"Chandigarh","source_type":"synthetic seed referencing legacy region nomenclature","as_of_date":"2026-10-27","current_mapping_verified":false}
+{"region_id":"SRO","region_name":"Southern Region","office_city":"Chennai","source_type":"synthetic seed referencing legacy region nomenclature","as_of_date":"2026-10-27","current_mapping_verified":false}
+{"region_id":"SCRO","region_name":"South-Central Region","office_city":"Hyderabad","source_type":"synthetic seed referencing legacy region nomenclature","as_of_date":"2026-10-27","current_mapping_verified":false}
+{"region_id":"SWRO","region_name":"South-Western Region","office_city":"Bengaluru","source_type":"synthetic seed referencing legacy region nomenclature","as_of_date":"2026-10-27","current_mapping_verified":false}
+{"region_id":"WRO","region_name":"Western Region","office_city":"Mumbai","source_type":"synthetic seed referencing legacy region nomenclature","as_of_date":"2026-10-27","current_mapping_verified":false}

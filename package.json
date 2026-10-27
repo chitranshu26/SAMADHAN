@@ -5,11 +5,11 @@
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
     "build": "next build",
-    "start": "next start --hostname 127.0.0.1",
+    "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "db:setup": "tsx scripts/seed-demo-users/setup.ts",
+    "db:setup": "tsx scripts/seed-demo-users/index.ts",
     "data:load": "tsx scripts/import-dataset/load.ts",
     "data:prepare": "py scripts/import-dataset/prepare.py",
     "demo:credentials": "node scripts/show-demo-credentials.mjs"

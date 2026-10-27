@@ -1,0 +1,31 @@
+{"subcategory_id":"FEE-01","category_id":"FEE","subcategory_name":"Non-refund of tuition fees or security deposits after admission cancellation"}
+{"subcategory_id":"FEE-02","category_id":"FEE","subcategory_name":"Charging unapproved capitation fees or add-on charges"}
+{"subcategory_id":"FEE-03","category_id":"FEE","subcategory_name":"Demanding multi-year fees in advance upon withdrawal or transfer"}
+{"subcategory_id":"FEE-04","category_id":"FEE","subcategory_name":"Non-disbursement or delay in scholarship or financial aid"}
+{"subcategory_id":"FEE-05","category_id":"FEE","subcategory_name":"Unreasonable hostel, mess, or transport fee demands"}
+{"subcategory_id":"DOC-01","category_id":"DOC","subcategory_name":"Retention of original marksheets or certificates"}
+{"subcategory_id":"DOC-02","category_id":"DOC","subcategory_name":"Refusal or delay in Transfer or Migration Certificates"}
+{"subcategory_id":"DOC-03","category_id":"DOC","subcategory_name":"Withholding provisional degree or semester transcripts due to disputed fees"}
+{"subcategory_id":"DOC-04","category_id":"DOC","subcategory_name":"Delay in roll number or examination admit card"}
+{"subcategory_id":"REG-01","category_id":"REG","subcategory_name":"Enrolling students beyond the AICTE-approved intake capacity"}
+{"subcategory_id":"REG-02","category_id":"REG","subcategory_name":"Offering technical courses without valid AICTE approval"}
+{"subcategory_id":"REG-03","category_id":"REG","subcategory_name":"Lack of required infrastructure or laboratories"}
+{"subcategory_id":"REG-04","category_id":"REG","subcategory_name":"Alleged fraudulent documentation in Extension of Approval"}
+{"subcategory_id":"REG-05","category_id":"REG","subcategory_name":"Operating from an unapproved campus location"}
+{"subcategory_id":"STAFF-01","category_id":"STAFF","subcategory_name":"Non-payment, delay, or under-payment of faculty salary"}
+{"subcategory_id":"STAFF-02","category_id":"STAFF","subcategory_name":"Termination without due procedural notice"}
+{"subcategory_id":"STAFF-03","category_id":"STAFF","subcategory_name":"Suspected ghost faculty records"}
+{"subcategory_id":"STAFF-04","category_id":"STAFF","subcategory_name":"Delay in service books or Provident Fund deposits"}
+{"subcategory_id":"STAFF-05","category_id":"STAFF","subcategory_name":"Excessive workload or denial of prescribed leave"}
+{"subcategory_id":"RAG-01","category_id":"RAG","subcategory_name":"Physical or psychological ragging incident"}
+{"subcategory_id":"RAG-02","category_id":"RAG","subcategory_name":"Non-functional Anti-Ragging Committee"}
+{"subcategory_id":"RAG-03","category_id":"RAG","subcategory_name":"Alleged failure to report or act on ragging incident"}
+{"subcategory_id":"DISC-01","category_id":"DISC","subcategory_name":"Alleged caste or religion-based discrimination"}
+{"subcategory_id":"DISC-02","category_id":"DISC","subcategory_name":"Alleged gender-based discrimination or harassment response failure"}
+{"subcategory_id":"DISC-03","category_id":"DISC","subcategory_name":"Accessibility barriers affecting persons with disabilities"}
+{"subcategory_id":"VIG-01","category_id":"VIG","subcategory_name":"Alleged misuse of public research grant"}
+{"subcategory_id":"VIG-02","category_id":"VIG","subcategory_name":"Suspected fraudulent scholarship claims or phantom enrolment"}
+{"subcategory_id":"VIG-03","category_id":"VIG","subcategory_name":"Alleged bribery by management or staff"}
+{"subcategory_id":"GOV-01","category_id":"GOV","subcategory_name":"Complaint forwarded via CPGRAMS"}
+{"subcategory_id":"GOV-02","category_id":"GOV","subcategory_name":"Ministry of Education referral or parliamentary matter"}
+{"subcategory_id":"GOV-03","category_id":"GOV","subcategory_name":"Court notice or legal-proceeding correspondence"}

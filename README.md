@@ -47,6 +47,32 @@ that mode. Keep credentials and other secrets out of Git.
   provider only when a user explicitly requests analysis; review provider
   retention policies before enabling it.
 
+## Deploying on Render
+
+The prepared synthetic demonstration dataset is included in
+`.data/import/`. The local PostgreSQL/PGlite files and generated demo passwords
+are not. Do not commit `.data/demo-credentials.json` or `.data/postgres/`.
+
+For a deployment that retains cases and accounts across restarts:
+
+1. Create a managed PostgreSQL database in Render.
+2. Set the web service's `DATABASE_URL` to that database's **internal**
+   connection string. Also set a strong, unique `SESSION_SECRET`.
+3. Deploy this repository. The web service must listen on `0.0.0.0`; `npm
+   run start` is configured for Render's network proxy.
+4. From the Render service Shell, run `npm run data:load` once to import the
+   checked-in synthetic records, then `npm run db:setup` to create demo
+   accounts. `npm run demo:credentials` prints their generated local passwords.
+5. To show demo account choices on the public login page, set
+   `PUBLIC_DEMO_ACCOUNTS=true`. This exposes shared demonstration credentials,
+   including the administrator account, to every visitor. Enable it only for
+   this synthetic demo deployment; never use these accounts for real data.
+
+The database import is idempotent. Do not upload `.data` database files or
+password files to GitHub: GitHub is source/version control, not a persistent
+database or secret store. Keep `DATABASE_URL` and `SESSION_SECRET` in Render's
+environment settings.
+
 ## Development
 
 ```powershell

@@ -1,0 +1,8 @@
+{"category_id":"FEE","category_name":"Fee & Financial Disputes","default_bureau_id":"PGRC","proposed_sla_days":14,"priority_label":"MEDIUM","official_policy_verified":false}
+{"category_id":"DOC","category_name":"Certificate & Document Retention","default_bureau_id":"PGRC","proposed_sla_days":7,"priority_label":"HIGH","official_policy_verified":false}
+{"category_id":"REG","category_name":"Regulatory & Academic Approval Violations","default_bureau_id":"RB","proposed_sla_days":15,"priority_label":"HIGH","official_policy_verified":false}
+{"category_id":"STAFF","category_name":"Faculty & Staff Service Grievances","default_bureau_id":"STAFF","proposed_sla_days":30,"priority_label":"STANDARD","official_policy_verified":false}
+{"category_id":"RAG","category_name":"Student Safety & Anti-Ragging","default_bureau_id":"RAG","proposed_sla_days":2,"priority_label":"CRITICAL","official_policy_verified":false}
+{"category_id":"DISC","category_name":"Discrimination & Social Welfare","default_bureau_id":"EOC","proposed_sla_days":7,"priority_label":"HIGH","official_policy_verified":false}
+{"category_id":"VIG","category_name":"Governance, Fraud & Grant Misuse","default_bureau_id":"VIG","proposed_sla_days":30,"priority_label":"AUDIT","official_policy_verified":false}
+{"category_id":"GOV","category_name":"Statutory & Government Escalations","default_bureau_id":"NODAL","proposed_sla_days":7,"priority_label":"HIGH","official_policy_verified":false}

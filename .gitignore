@@ -2,13 +2,15 @@ node_modules/
 .next/
 .env*
 !.env.example
-i
 work/
 test-results/
 playwright-report/
 *.tsbuildinfo
 *.zip
-
+.data/demo-credentials.json
+.data/postgres/
+.data/postgres-recovered/
+.data/postgres-unavailable-*/
 __pycache__/
 .vercel/
 !.github/
