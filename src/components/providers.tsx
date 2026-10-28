@@ -11,7 +11,7 @@ export const useToast = () => useContext(ToastContext);
 export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(() => new QueryClient({ defaultOptions: { queries: { staleTime: 10000, retry: 1, refetchOnWindowFocus: true } } }));
   const [toasts, setToasts] = useState<Toast[]>([]);
-  useEffect(() => { if (localStorage.getItem("samadhan-theme") === "dark") document.documentElement.classList.add("dark"); }, []);
+  useEffect(() => { const saved=localStorage.getItem("samadhan-theme")||"dark";document.documentElement.dataset.theme=saved;document.documentElement.classList.toggle("dark",saved==="dark"); }, []);
   const toast = (message: string, error = false) => {
     const id = Date.now(); setToasts(current => [...current.slice(-3), { id, message, error }]);
     setTimeout(() => setToasts(current => current.filter(item => item.id !== id)), 6000);

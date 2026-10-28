@@ -24,15 +24,20 @@ async function connect():Promise<DB>{
  await adapter.exec(original);
  await adapter.exec('SET search_path TO aicte_demo, public');
  await adapter.exec('CREATE TABLE IF NOT EXISTS aicte_demo.app_migrations(name TEXT PRIMARY KEY,applied_at TIMESTAMPTZ DEFAULT now())');
- const migrations=(await fs.readdir(path.join(root,'database/migrations'))).filter(f=>f.endsWith('.sql')).sort();
- for(const name of migrations){if(name.includes('supabase'))continue;const applied=await adapter.query('SELECT name FROM aicte_demo.app_migrations WHERE name=$1',[name]);if(!applied.rows.length)await adapter.transaction(async tx=>{await tx.exec(await fs.readFile(path.join(root,'database/migrations',name),'utf8'));await tx.query('INSERT INTO aicte_demo.app_migrations(name) VALUES($1)',[name]);});}
+ await applyMigrations(adapter);
  return adapter;
 }
-export async function db(){if(!globalThis.__samadhanDB)globalThis.__samadhanDB=connect().catch(e=>{globalThis.__samadhanDB=undefined;throw e;});return globalThis.__samadhanDB;}
+async function applyMigrations(adapter:DB){
+ const migrations=(await fs.readdir(path.join(root,'database/migrations'))).filter(f=>f.endsWith('.sql')).sort();
+ for(const name of migrations){if(name.includes('supabase'))continue;const applied=await adapter.query('SELECT name FROM aicte_demo.app_migrations WHERE name=$1',[name]);if(!applied.rows.length)await adapter.transaction(async tx=>{await tx.exec(await fs.readFile(path.join(root,'database/migrations',name),'utf8'));await tx.query('INSERT INTO aicte_demo.app_migrations(name) VALUES($1)',[name]);});}
+}
+// Also refresh a reused development connection after new migration files arrive.
+let migrationRefresh:Promise<void>|undefined;
+export async function db(){if(!globalThis.__samadhanDB)globalThis.__samadhanDB=connect().catch(e=>{globalThis.__samadhanDB=undefined;throw e;});const conn=await globalThis.__samadhanDB;if(!migrationRefresh)migrationRefresh=applyMigrations(conn).catch(e=>{migrationRefresh=undefined;throw e;});await migrationRefresh;return conn;}
 export const getDB=db;
 export const ensureDatabase=db;
 export async function query<T=Row>(sql:string,params:any[]=[]){return (await (await db()).query<T>(sql,params)).rows;}
-export async function closeDatabase(){const conn=globalThis.__samadhanDB;globalThis.__samadhanDB=undefined;if(conn)await (await conn).close?.();}
+export async function closeDatabase(){migrationRefresh=undefined;const conn=globalThis.__samadhanDB;globalThis.__samadhanDB=undefined;if(conn)await (await conn).close?.();}
 
 export async function seedDemoUsers(){
  const conn=await db();const existing=await conn.query('SELECT id FROM app_users LIMIT 1');if(existing.rows.length)return;

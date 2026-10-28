@@ -22,6 +22,7 @@ import {
 } from "./ui";
 
 import { useToast } from "./providers";
+import { EmailDeliveryPanel } from "./email-delivery-panel";
 
 // Registered user structure
 type RegisteredUser = {
@@ -36,6 +37,8 @@ type RegisteredUser = {
 
 type AdminResponse = {
   users: RegisteredUser[];
+  emails?: Record<string, any>[];
+  health?: { email?: string };
 };
 
 export function Admin({
@@ -362,6 +365,8 @@ export function Admin({
       {/* ========================================= */}
       {/* ORIGINAL ACCOUNT & GOVERNANCE SECTION */}
       {/* ========================================= */}
+
+      <EmailDeliveryPanel rows={data?.emails} status={data?.health?.email} onRefresh={refetch} />
 
       <Panel
         title="Account & governance overview"

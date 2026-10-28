@@ -1,0 +1,225 @@
+/* Additional polish is deliberately scoped away from dashboards and analytics.
+   No root/body/shared chart tokens are overridden by this file. */
+:is(.public-page, .auth-page, .workspace.visual-eligible) {
+  --portal-navy: #123a73;
+  --portal-green: #168b65;
+  --portal-teal: #19b7ad;
+  --portal-gold: #d4ac48;
+  --portal-space: clamp(18px, 2.2vw, 32px);
+  font-family: "Segoe UI Variable", "Segoe UI", "Noto Sans", "Nirmala UI", Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+:is(.public-page, .auth-page, .workspace.visual-eligible) :is(input, select, textarea, button) {
+  font: inherit;
+}
+:is(.public-page, .auth-page, .workspace.visual-eligible) :is(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid #248b92;
+  outline-offset: 3px;
+}
+:is(.public-page, .auth-page, .workspace.visual-eligible) .btn {
+  min-height: 44px;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: .01em;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+:is(.public-page, .auth-page, .workspace.visual-eligible) .btn:hover:not(:disabled) { transform: translateY(-1px); }
+:is(.public-page, .auth-page, .workspace.visual-eligible) .btn:active:not(:disabled) { transform: translateY(0); }
+:is(.public-page, .auth-page, .workspace.visual-eligible) :is(h1,h2,h3) { line-height: 1.3; }
+:is(.public-page, .auth-page, .workspace.visual-eligible) label { line-height: 1.5; font-weight: 600; }
+
+/* Public information: a restrained service-led hierarchy. */
+.public-page .public-nav { align-items: center; }
+.public-page .public-nav .brand { flex-shrink: 0; }
+.public-page .hero { padding-top: 38px; gap: clamp(25px, 4vw, 64px); }
+.public-page .hero-content h1 { font-size: clamp(36px, 4.3vw, 62px); font-weight: 750; line-height: 1.13; }
+.public-page .hero-content > p { max-width: 550px; line-height: 1.85; font-size: 16px; }
+.public-page .hero-trust { border-top: 1px solid #e2e8f0; padding-top: 20px; }
+.public-page .section-heading h2 { font-size: clamp(26px, 3vw, 38px); letter-spacing: -.035em; }
+.public-page :is(.role-card,.feature-card,.public-workflow > div) { transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease; }
+.public-page :is(.role-card,.feature-card):hover { border-color: #b7cbdc; box-shadow: 0 10px 24px rgb(18 58 115 / 7%); transform: translateY(-2px); }
+.public-page .help-questions details { padding: 20px 0; border-bottom: 1px solid #dce5ef; }
+.public-page .help-questions summary { font-size: 14px; line-height: 1.6; font-weight: 600; }
+.public-page .help-questions p { line-height: 1.8; }
+.public-page .public-footer a { padding-block: 4px; }
+
+/* Authentication: preserve native fields, autofill and validation. */
+.auth-page .auth-main { padding: clamp(26px, 5vw, 72px); }
+.auth-page .auth-form-wrap { max-width: 480px; width: 100%; }
+.auth-page .auth-form-wrap h1 { font-size: clamp(27px, 3vw, 36px); letter-spacing: -.035em; margin-top: 16px; }
+.auth-page .auth-form-wrap > p { line-height: 1.8; margin-bottom: 28px; }
+.auth-page .auth-form { gap: 20px; }
+.auth-page :is(input,select) { min-height: 46px; }
+.auth-page .auth-pitch h2 { font-size: clamp(28px, 3vw, 40px); line-height: 1.24; }
+.auth-page .auth-pitch p { max-width: 420px; line-height: 1.9; }
+.auth-page .auth-pitch-features { gap: 12px; }
+.auth-page .demo-accounts { border: 1px solid #dce6ef; border-radius: 12px; background: #f5f8fc; }
+
+/* Non-analytics workspace pages only. */
+.workspace.visual-eligible .workspace-content { padding: var(--portal-space); min-width: 0; }
+.workspace.visual-eligible .workspace-main { min-width: 0; }
+.workspace.visual-eligible .page-title { gap: 18px; align-items: flex-start; margin-bottom: 28px; }
+.workspace.visual-eligible .page-title h1 { font-size: clamp(25px, 2.6vw, 34px); letter-spacing: -.03em; }
+.workspace.visual-eligible .page-title p { max-width: 780px; line-height: 1.75; margin-top: 8px; }
+.workspace.visual-eligible .eyebrow { letter-spacing: .14em; font-size: 10px; margin-bottom: 8px; }
+.workspace.visual-eligible .panel { overflow: hidden; box-shadow: 0 3px 18px rgb(18 58 115 / 4%); }
+.workspace.visual-eligible .panel-header { padding: 20px 24px; gap: 16px; }
+.workspace.visual-eligible .panel-header h2 { font-size: 16px; font-weight: 650; }
+.workspace.visual-eligible .panel-header p { margin-top: 5px; line-height: 1.65; }
+.workspace.visual-eligible .panel-body { padding: 24px; }
+.workspace.visual-eligible :is(.form-grid,.filter-grid) { gap: 18px; }
+.workspace.visual-eligible :is(input:not([type=checkbox]):not([type=radio]),select) { min-height: 44px; }
+.workspace.visual-eligible textarea { min-height: 120px; line-height: 1.75; }
+.workspace.visual-eligible :is(input,textarea,select) { transition: border-color 160ms ease, box-shadow 160ms ease; }
+.workspace.visual-eligible :is(input,textarea,select):focus { box-shadow: 0 0 0 3px rgb(25 183 173 / 10%); }
+.workspace.visual-eligible :is(.table-wrap,.table-container) { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+.workspace.visual-eligible .case-table :is(th,td) { padding: 15px 17px; vertical-align: middle; }
+.workspace.visual-eligible .case-table th { font-size: 10px; letter-spacing: .07em; }
+.workspace.visual-eligible .case-table td { line-height: 1.65; }
+.workspace.visual-eligible .case-table tbody tr { transition: background-color 160ms ease; }
+.workspace.visual-eligible .badge { font-size: 10px; font-weight: 650; padding: 5px 9px; }
+.workspace.visual-eligible .sidebar-nav a { min-height: 44px; transition: background 160ms ease, color 160ms ease; }
+.workspace.visual-eligible .sidebar-nav a.active { box-shadow: inset 3px 0 #d4ac48; }
+.workspace.visual-eligible .workspace-content > :first-child { animation: portal-content-in 300ms ease both; }
+.workspace.visual-eligible .tabs { gap: 5px; overflow-x: auto; scrollbar-width: thin; }
+.workspace.visual-eligible .tabs button { min-height: 44px; white-space: nowrap; }
+.workspace.visual-eligible .timeline-item { padding-bottom: 24px; }
+.workspace.visual-eligible .timeline-item p { line-height: 1.8; }
+
+/* Initial entry is a visual overlay, with the existing app mounted underneath. */
+.brand-intro { z-index: 2147483000; }
+.brand-intro-copy { max-width: 100%; }
+.brand-intro-copy span { overflow-wrap: anywhere; }
+@keyframes portal-content-in { from { opacity: .4; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+@media (min-width: 1600px) {
+  .workspace.visual-eligible .workspace-content { max-width: 1720px; width: 100%; margin-inline: auto; }
+}
+@media (max-width: 1050px) {
+  .public-page .public-nav { gap: 18px; padding-inline: 24px; }
+  .public-page .public-links { gap: 14px; }
+  .workspace.visual-eligible .page-title { flex-wrap: wrap; }
+  .workspace.visual-eligible .page-actions { flex-wrap: wrap; gap: 8px; }
+}
+@media (max-width: 768px) {
+  .public-page .public-nav { flex-wrap: wrap; }
+  .public-page .public-links { order: 3; width: 100%; display: flex; flex-wrap: wrap; justify-content: center; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+  .public-page .public-nav > .btn { margin-left: auto; }
+  .public-page .hero { padding-top: 22px; }
+  .public-page .hero-actions { flex-wrap: wrap; }
+  .public-page .hero-actions .btn { flex: 1 1 190px; justify-content: center; }
+  .auth-page .auth-main { padding: 28px 24px; }
+  .workspace.visual-eligible .panel-header { padding: 18px; flex-wrap: wrap; }
+  .workspace.visual-eligible .panel-body { padding: 18px; }
+  .workspace.visual-eligible .workspace-header { gap: 10px; }
+  .workspace.visual-eligible .header-tools { gap: 6px; }
+  .workspace.visual-eligible .icon-btn { min-width: 40px; min-height: 40px; }
+}
+@media (max-width: 480px) {
+  .public-page .public-nav { padding: 16px; gap: 12px; }
+  .public-page .public-nav .brand strong { font-size: 21px; }
+  .public-page .public-nav > .btn { font-size: 11px; padding: 9px 11px; }
+  .public-page .public-nav .brand small { max-width: 145px; }
+  .public-page > main { padding-inline: 18px; }
+  .public-page .hero-content h1 { font-size: 36px; }
+  .public-page .hero-trust { gap: 12px; }
+  .workspace.visual-eligible .workspace-content { padding: 18px 12px; }
+  .workspace.visual-eligible .page-actions { width: 100%; }
+  .workspace.visual-eligible .page-actions > .btn { flex: 1 1 auto; justify-content: center; }
+  .workspace.visual-eligible .case-table :is(th,td) { padding: 12px; }
+  .auth-page .auth-main { padding: 24px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.public-page,.auth-page,.workspace.visual-eligible) *,
+  :is(.public-page,.auth-page,.workspace.visual-eligible) *::before,
+  :is(.public-page,.auth-page,.workspace.visual-eligible) *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* Expressive editorial finish; analytics routes remain outside this scope. */
+.public-page { background: linear-gradient(180deg,#f7faff 0%,#fff 38%,#f4f8fc 100%); }
+.public-page .public-nav { box-shadow: 0 8px 28px rgb(18 58 115 / 5%); border-radius: 0 0 18px 18px; }
+.public-page .hero { position: relative; isolation: isolate; }
+.public-page .hero::before { content: ""; position: absolute; z-index: -1; right: -2%; top: 2%; width: 54%; height: 80%; background: radial-gradient(ellipse at 65% 40%,rgb(25 183 173 / 9%),rgb(23 63 134 / 5%) 40%,transparent 70%); pointer-events: none; }
+.public-page .hero-content h1 { color: #102f5c; letter-spacing: -.055em; }
+.public-page .hero-content h1 span { background: linear-gradient(110deg,#173f86 20%,#168b65 85%); background-clip: text; -webkit-background-clip: text; color: transparent; }
+.public-page .hero-content > * { animation: portal-editorial-enter 700ms cubic-bezier(.16,1,.3,1) both; }
+.public-page .hero-content > :nth-child(2) { animation-delay: 100ms; }
+.public-page .hero-content > :nth-child(3) { animation-delay: 180ms; }
+.public-page .hero-content > :nth-child(4) { animation-delay: 260ms; }
+.public-page .hero-content > :nth-child(5) { animation-delay: 340ms; }
+.public-page .visual-window { border-radius: 18px; border: 1px solid #d6e2ed; box-shadow: 0 24px 65px rgb(18 58 115 / 11%),0 4px 10px rgb(18 58 115 / 4%); transition: transform 400ms ease,box-shadow 400ms ease; }
+.public-page .visual-window:hover { transform: translateY(-4px); box-shadow: 0 30px 75px rgb(18 58 115 / 15%); }
+.public-page .visual-window-top { background: #eef4fb; border-bottom-color: #dce7ef; }
+.public-page .float-card { border-radius: 14px; box-shadow: 0 12px 35px rgb(18 58 115 / 13%); animation: portal-float-intro 4s ease-in-out 2; }
+.public-page .brand-model-stage { box-shadow: inset 0 0 0 1px rgb(18 58 115 / 5%),0 12px 35px rgb(18 58 115 / 5%); background: radial-gradient(ellipse at 50% 40%,#fff 35%,#eef5fa); }
+.public-page :is(.feature-card,.role-card) { position: relative; overflow: hidden; background: linear-gradient(150deg,#fff,#f9fbfe); border-color: #dde6f0; box-shadow: 0 4px 16px rgb(18 58 115 / 3%); }
+.public-page :is(.feature-card,.role-card)::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg,#173f86,#168b65); transform: scaleX(0); transform-origin: left; transition: transform 350ms ease; }
+.public-page :is(.feature-card,.role-card):hover::before { transform: scaleX(1); }
+.public-page :is(.feature-card,.role-card):hover { transform: translateY(-5px); box-shadow: 0 18px 34px rgb(18 58 115 / 9%); }
+.public-page .role-card > svg { transition: transform 250ms ease; }
+.public-page .role-card:hover > svg { transform: translate(3px,-3px); }
+.public-page .role-number { color: #bbcbdc; font-weight: 750; }
+.public-page .public-workflow > div { background: #fff; box-shadow: 0 6px 20px rgb(18 58 115 / 4%); transition: transform 250ms ease,border-color 250ms ease; }
+.public-page .public-workflow > div:hover { transform: translateY(-4px); border-color: #9cbccf; }
+.public-page .public-cta { box-shadow: 0 18px 45px rgb(18 58 115 / 16%); border-radius: 20px; }
+.public-page .public-cta .btn:hover { box-shadow: 0 8px 20px rgb(0 0 0 / 15%); }
+.public-page .help-questions details[open] { padding-inline: 16px; background: #edf4fa; border-radius: 10px; }
+.public-page .help-questions details[open] p { animation: portal-editorial-enter 250ms ease both; }
+
+/* Authentication carries the same dimensional identity. */
+.auth-page .auth-aside { background: radial-gradient(ellipse at 80% 20%,rgb(25 183 173 / 16%),transparent 50%),linear-gradient(150deg,#123a73,#102b51 70%); }
+.auth-page .auth-shield { box-shadow: 0 22px 65px rgb(0 0 0 / 20%),0 0 0 12px rgb(255 255 255 / 3%); animation: portal-logo-arrive 1000ms cubic-bezier(.16,1,.3,1) both; }
+.auth-page .auth-form-wrap { padding: 30px; border: 1px solid #e1e8f0; border-radius: 20px; background: #fff; box-shadow: 0 18px 65px rgb(18 58 115 / 7%); animation: portal-editorial-enter 650ms cubic-bezier(.16,1,.3,1) both; }
+.auth-page .auth-main { background: radial-gradient(ellipse at 100% 0%,#eaf3f8,transparent 55%),#f7f9fc; }
+.auth-page .auth-form-wrap h1 { color: #123a73; }
+.auth-page .input-group:focus-within { box-shadow: 0 0 0 4px rgb(25 183 173 / 9%); border-color: #168b65; transition: box-shadow 200ms ease,border-color 200ms ease; }
+.auth-page .orbit-node { box-shadow: 0 8px 25px rgb(0 0 0 / 14%); }
+
+/* Casework gets richer feedback without introducing controls or remounts. */
+.workspace.visual-eligible .workspace-header { box-shadow: 0 5px 20px rgb(18 58 115 / 4%); }
+.workspace.visual-eligible .panel { transition: border-color 250ms ease,box-shadow 250ms ease; }
+.workspace.visual-eligible .panel:hover { box-shadow: 0 8px 28px rgb(18 58 115 / 7%); }
+.workspace.visual-eligible .panel-header { background: linear-gradient(110deg,rgb(23 63 134 / 3%),transparent 75%); }
+.workspace.visual-eligible .sidebar-nav a { position: relative; border-radius: 9px; }
+.workspace.visual-eligible .sidebar-nav a svg { transition: transform 200ms ease; }
+.workspace.visual-eligible .sidebar-nav a:hover svg { transform: translateX(2px); }
+.workspace.visual-eligible .sidebar-nav a.active { background: linear-gradient(90deg,rgb(255 255 255 / 16%),rgb(255 255 255 / 5%)); }
+.workspace.visual-eligible .case-table tbody tr:hover { box-shadow: inset 3px 0 #19b7ad; }
+.workspace.visual-eligible .page-title .eyebrow { color: var(--primary); }
+.workspace.visual-eligible :is(.institution-card,.notification-card,.complaint-card) { transition: transform 220ms ease,box-shadow 220ms ease,border-color 220ms ease; }
+.workspace.visual-eligible :is(.institution-card,.notification-card,.complaint-card):hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgb(18 58 115 / 8%); }
+.workspace.visual-eligible .timeline-item { animation: portal-editorial-enter 400ms ease both; }
+.workspace.visual-eligible .timeline-item:nth-child(2) { animation-delay: 50ms; }
+.workspace.visual-eligible .timeline-item:nth-child(3) { animation-delay: 100ms; }
+.workspace.visual-eligible .timeline-item:nth-child(4) { animation-delay: 150ms; }
+:is(.public-page,.auth-page,.workspace.visual-eligible) .btn-primary { background: linear-gradient(120deg,#173f86,#123a73); box-shadow: 0 5px 14px rgb(18 58 115 / 17%); }
+:is(.public-page,.auth-page,.workspace.visual-eligible) .btn-primary:hover:not(:disabled) { box-shadow: 0 8px 23px rgb(18 58 115 / 25%); }
+:is(.public-page,.auth-page,.workspace.visual-eligible) .btn svg { transition: transform 200ms ease; }
+:is(.public-page,.auth-page,.workspace.visual-eligible) .btn:hover:not(:disabled) svg:last-child { transform: translateX(2px); }
+.brand-intro-model { width: min(72vw,380px); height: min(72vw,380px); max-height: 45vh; }
+.brand-intro-copy strong { text-shadow: 0 4px 18px rgb(18 58 115 / 9%); }
+.brand-intro-line { width: 220px; height: 4px; }
+@keyframes portal-editorial-enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes portal-logo-arrive { from { opacity: 0; transform: translateY(16px) scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes portal-float-intro { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+/* Native scroll reveals progressively enhance informational content only. */
+@supports (animation-timeline: view()) {
+  .public-page :is(.section-heading,.feature-grid,.role-grid,.public-workflow,.help-grid) {
+    animation: portal-editorial-enter linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 25%;
+  }
+}
+@media (hover:none) {
+  .public-page :is(.feature-card,.role-card):hover,.workspace.visual-eligible :is(.institution-card,.notification-card,.complaint-card):hover { transform: none; }
+}
+@media (max-width:600px) {
+  .auth-page .auth-form-wrap { padding: 23px 18px; border-radius: 15px; }
+  .public-page .public-cta { border-radius: 14px; }
+  .brand-intro-model { width: 285px; height: 285px; max-width: 80vw; }
+}
+@media (prefers-reduced-motion:reduce) {
+  :is(.public-page,.auth-page,.workspace.visual-eligible) *,
+  :is(.public-page,.auth-page,.workspace.visual-eligible) *::before,
+  :is(.public-page,.auth-page,.workspace.visual-eligible) *::after { animation: none !important; transition: none !important; transform: none !important; }
+}
