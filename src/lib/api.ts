@@ -98,31 +98,760 @@ async function duplicateAPI(req:Request,user:User,url:URL){
  const filtered=status&&status!=='all'?all.filter(r=>r.status===status):all;let model:Row={};try{model=await(await import('@/lib/ai/duplicate')).modelInfo();}catch{}return json({rows:filtered.slice((page-1)*limit,page*limit),total:filtered.length,page,pageSize:limit,stats:{total:all.length,pending:all.filter(r=>r.status==='pending').length,confirmed:all.filter(r=>r.status==='confirmed'||r.status==='merged').length,rejected:all.filter(r=>r.status==='rejected').length,cross_bureau:all.filter(r=>r.bureau_a!==r.bureau_b).length},model});
 }
 
-async function adminAPI(req:Request,user:User,url:URL){
- assertAdmin(user);
- if(req.method==='GET'){
-  const count=(await query('SELECT count(*)::integer complaints,count(*) FILTER(WHERE record_origin=\'live_demo\')::integer live FROM complaints'))[0];let summary:Row={},progress:Row={};try{summary=JSON.parse(await fs.readFile(path.join(dataRoot,'import/import-summary.json'),'utf8'));}catch{}try{progress=JSON.parse(await fs.readFile(path.join(dataRoot,'import/database-progress.json'),'utf8'));}catch{}
-  const settingsData=await settings();const outbox=await query('SELECT * FROM email_outbox ORDER BY created_at DESC LIMIT 100');
-  return json({users:await query('SELECT id,email,name,role,designation,bureau_id,region_id,officer_id,verified,active,created_at FROM app_users ORDER BY role,name'),settings:settingsData,outbox,emails:outbox,health:{status:'healthy',database:process.env.DATABASE_URL?'PostgreSQL':'Persistent local PGlite (PostgreSQL)',database_status:'connected',email:process.env.SMTP_HOST?'SMTP configured; delivery acceptance recorded per attempt':'Simulated local outbox',realtime:'Authorized polling (15 seconds); Supabase Realtime adapter available when configured',complaints:count.complaints,live_demo_complaints:count.live,supabase_configured:Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),smtp_configured:Boolean(process.env.SMTP_HOST),synthetic:true,scheduler:await query('SELECT * FROM scheduled_jobs')},imports:await query('SELECT * FROM import_jobs ORDER BY started_at DESC LIMIT 20'),import_summary:summary,import_progress:progress,audit:await query('SELECT a.*,u.name actor_name FROM audit_logs a LEFT JOIN app_users u ON u.id=a.actor_id ORDER BY created_at DESC LIMIT 100'),policies:await query('SELECT p.*,c.category_name FROM sla_policies p JOIN categories c USING(category_id) ORDER BY p.category_id'),routing:await query('SELECT * FROM categories ORDER BY category_id'),regions:await query('SELECT * FROM regions'),states:await query('SELECT * FROM states'),bureaus:await query('SELECT * FROM bureaus'),templates:settingsData.notification_templates||{},model:await(await import('@/lib/ai/duplicate')).modelInfo()});
- }
- const input=await body(req),action=String(input.action||'');let result:Row={success:true};
- if(action==='user_update'){
-  const target=(await query('SELECT * FROM app_users WHERE id=$1',[input.id]))[0];if(!target)throw new APIError(404,'User not found.');const allowedRoles=['complainant','so','da','director','chairman','admin'];const role=input.role||target.role;if(!allowedRoles.includes(role))throw new APIError(400,'Invalid role.');if(target.id===user.id&&(input.active===false||role!=='admin'))throw new APIError(400,'You cannot remove your own administrator access.');const bureau=['so','da','director'].includes(role)?input.bureau_id||target.bureau_id:null;if(['so','da','director'].includes(role)&&!bureau)throw new APIError(400,'Assign a bureau to this officer role.');if(role==='complainant'&&!target.complainant_id)throw new APIError(400,'This account has no complainant identity; register a complainant account instead.');const region=input.region_id===null||input.region_id===''?null:input.region_id||target.region_id;let officer=target.officer_id;if(['so','da','director'].includes(role)&&!officer)officer=`OFF-${target.id}`;
-  await(await db()).transaction(async tx=>{if(officer)await tx.query('INSERT INTO officers(officer_id,pseudonym,bureau_id,region_id,role,active,on_duty_from,source_type) VALUES($1,$2,$3,$4,$5,$6,CURRENT_DATE,\'LIVE_DEMO\') ON CONFLICT(officer_id) DO UPDATE SET bureau_id=excluded.bureau_id,region_id=excluded.region_id,role=excluded.role,active=excluded.active',[officer,target.name,bureau,region,({so:'Section Officer',da:'Dealing Assistant',director:'Director'} as Row)[role]||'Inactive officer',input.active??target.active]);await tx.query('UPDATE app_users SET role=$2,bureau_id=$3,region_id=$4,active=$5,officer_id=$6 WHERE id=$1',[target.id,role,bureau,region,input.active??target.active,officer]);if(input.active===false||role!==target.role)await tx.query('DELETE FROM sessions WHERE user_id=$1',[target.id]);await audit(user.id,'USER_UPDATED',target.id,{role,bureau,region,active:input.active},tx);});
- }else if(action==='setting_update'){
-  const key=String(input.key||'');if(!['duplicate_threshold','sla_warning_hours','demo_mode','replay_enabled','approval_policy','notification_templates','required_documents','institution_aliases','geographic_mapping_source'].includes(key))throw new APIError(400,'This setting cannot be changed through the application.');if(key==='duplicate_threshold'&&(Number(input.value)<.1||Number(input.value)>1))throw new APIError(400,'Threshold must be between 0.1 and 1.');await query('INSERT INTO system_settings(key,value,updated_by) VALUES($1,$2,$3) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_by=excluded.updated_by,updated_at=now()',[key,JSON.stringify(input.value),user.id]);
- }else if(action==='sla_update'){
-  const hours=Number(input.target_hours);if(!Number.isFinite(hours)||hours<1||hours>8760)throw new APIError(400,'SLA hours must be between 1 and 8760.');await query('UPDATE sla_policies SET target_hours=$2,policy_source=\'ADMIN_DEMO_CONFIGURATION\' WHERE sla_policy_id=$1',[input.sla_policy_id,hours]);await query('UPDATE categories SET proposed_sla_days=$2 WHERE category_id=(SELECT category_id FROM sla_policies WHERE sla_policy_id=$1)',[input.sla_policy_id,Math.ceil(hours/24)]);result.message='Policy updated for future complaints. Existing deadlines preserve their submission-time policy.';
- }else if(action==='routing_update'){await query('UPDATE categories SET default_bureau_id=$2 WHERE category_id=$1',[input.category_id,input.bureau_id]);}
- else if(action==='geography_update'){await query('UPDATE states SET region_id=$2,jurisdiction_source=$3,jurisdiction_current_verified=$4 WHERE state_code=$1',[input.state_code,input.region_id,String(input.source||'Administrator demonstration mapping'),Boolean(input.verified)]);}
- else if(action==='run_sla')result={success:true,...await evaluateSLA()};
- else if(action==='retry_email'){if(!process.env.SMTP_HOST)throw new APIError(409,'Configure SMTP to deliver actual messages. The simulated inbox already contains local messages.');await query("UPDATE email_outbox SET status='pending',attempts=0,next_attempt_at=now() WHERE id=$1 AND status IN ('failed','simulated')",[input.id]);result={success:true,...await processOutbox()};}
- else if(action==='send_test_email'){const recipient=parsed(z.string().email(),input.email||user.email);await queueEmail(await db(),{...user,email:recipient},id('TEST'),'SAMADHAN | Email Transport Test','This is a synthetic demonstration transport test. Provider acceptance is logged only when SMTP accepts the message.',process.env.APP_URL||'http://localhost:3000');result={success:true,...await processOutbox(),message:process.env.SMTP_HOST?'Test message queued and delivery attempted; inspect the status log.':'Test message saved in the simulated inbox. No external email was sent.'};}
- else if(action==='save_template'){const templates=(await settings()).notification_templates||{};const code=String(input.code||'STATUS_UPDATE').slice(0,80);templates[code]={subject:String(input.subject||'SAMADHAN | Complaint Status Update').slice(0,180),message:String(input.message||'A complaint status update is available.').slice(0,3000)};await query('INSERT INTO system_settings(key,value,updated_by) VALUES(\'notification_templates\',$1,$2) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_by=excluded.updated_by,updated_at=now()',[JSON.stringify(templates),user.id]);}
- else if(action==='run_import'){const running=await query("SELECT id FROM import_jobs WHERE status='running' AND started_at>now()-INTERVAL '1 hour'");if(running.length)throw new APIError(409,'An import is already running.');const job=id('IMP');await query("INSERT INTO import_jobs(id,mode,status) VALUES($1,'incremental prepared dataset','running')",[job]);void importPrepared(job).catch(async(e)=>{await query("UPDATE import_jobs SET status='failed',details=$2,completed_at=now() WHERE id=$1",[job,JSON.stringify({error:e instanceof Error?e.message:'Import failed'})]);});result={success:true,job_id:job,message:'Prepared connected dataset import started. Progress is persisted in Import Jobs.'};}
- else if(action==='validate_data'){const violations=await query('SELECT c.complaint_id FROM complaints c LEFT JOIN institutions i USING(institution_id) LEFT JOIN categories k USING(category_id) WHERE i.institution_id IS NULL OR k.category_id IS NULL LIMIT 30');result={success:violations.length===0,violations,complaints:Number((await query('SELECT count(*) n FROM complaints'))[0].n),message:violations.length?'Referential validation found issues.':'Database foreign-key validation passed.'};}
- else throw new APIError(400,'Unknown administrator action.');
- await audit(user.id,`ADMIN_${action.toUpperCase()}`,String(input.id||input.key||input.category_id||'system'),{action});return json(result);
+async function adminAPI(req: Request, user: User, url: URL) {
+  assertAdmin(user);
+
+  if (req.method === 'GET') {
+    const count = (
+      await query(
+        "SELECT count(*)::integer complaints,count(*) FILTER(WHERE record_origin='live_demo')::integer live FROM complaints"
+      )
+    )[0];
+
+    let summary: Row = {};
+    let progress: Row = {};
+
+    try {
+      summary = JSON.parse(
+        await fs.readFile(
+          path.join(dataRoot, 'import/import-summary.json'),
+          'utf8'
+        )
+      );
+    } catch {}
+
+    try {
+      progress = JSON.parse(
+        await fs.readFile(
+          path.join(dataRoot, 'import/database-progress.json'),
+          'utf8'
+        )
+      );
+    } catch {}
+
+    const settingsData = await settings();
+
+    const outbox = await query(
+      'SELECT * FROM email_outbox ORDER BY created_at DESC LIMIT 100'
+    );
+
+    return json({
+      users: await query(
+        'SELECT id,email,name,role,designation,bureau_id,region_id,officer_id,verified,active,created_at FROM app_users ORDER BY role,name'
+      ),
+
+      settings: settingsData,
+      outbox,
+      emails: outbox,
+
+      health: {
+        status: 'healthy',
+
+        database: process.env.DATABASE_URL
+          ? 'PostgreSQL'
+          : 'Persistent local PGlite (PostgreSQL)',
+
+        database_status: 'connected',
+
+        email: process.env.SMTP_HOST
+          ? 'SMTP configured; delivery acceptance recorded per attempt'
+          : 'Simulated local outbox',
+
+        realtime:
+          'Authorized polling (15 seconds); Supabase Realtime adapter available when configured',
+
+        complaints: count.complaints,
+        live_demo_complaints: count.live,
+
+        supabase_configured: Boolean(
+          process.env.NEXT_PUBLIC_SUPABASE_URL
+        ),
+
+        smtp_configured: Boolean(process.env.SMTP_HOST),
+        synthetic: true,
+
+        scheduler: await query(
+          'SELECT * FROM scheduled_jobs'
+        )
+      },
+
+      imports: await query(
+        'SELECT * FROM import_jobs ORDER BY started_at DESC LIMIT 20'
+      ),
+
+      import_summary: summary,
+      import_progress: progress,
+
+      audit: await query(
+        'SELECT a.*,u.name actor_name FROM audit_logs a LEFT JOIN app_users u ON u.id=a.actor_id ORDER BY created_at DESC LIMIT 100'
+      ),
+
+      policies: await query(
+        'SELECT p.*,c.category_name FROM sla_policies p JOIN categories c USING(category_id) ORDER BY p.category_id'
+      ),
+
+      routing: await query(
+        'SELECT * FROM categories ORDER BY category_id'
+      ),
+
+      regions: await query('SELECT * FROM regions'),
+      states: await query('SELECT * FROM states'),
+      bureaus: await query('SELECT * FROM bureaus'),
+
+      templates: settingsData.notification_templates || {},
+
+      model: await (
+        await import('@/lib/ai/duplicate')
+      ).modelInfo()
+    });
+  }
+
+  const input = await body(req);
+  const action = String(input.action || '');
+
+  let result: Row = { success: true };
+
+  // =====================================================
+  // NEW FEATURE: ADMIN REGISTRATION APPROVAL / REJECTION
+  // =====================================================
+
+  if (action === 'registration_decide') {
+
+    const targetId = parsed(
+      z.string().min(1).max(100),
+      input.id
+    );
+
+    const decision = parsed(
+      z.enum(['approve', 'reject']),
+      input.decision
+    );
+
+    const reason = String(input.reason ?? '').trim();
+
+    if (decision === 'reject' && reason.length < 5) {
+      throw new APIError(
+        400,
+        'Please provide a rejection reason.'
+      );
+    }
+
+    if (reason.length > 500) {
+      throw new APIError(
+        400,
+        'Reason must be under 500 characters.'
+      );
+    }
+
+    await (await db()).transaction(async (tx) => {
+
+      const records = await tx.query(
+        `SELECT id, role, verified, active
+         FROM app_users
+         WHERE id = $1
+         FOR UPDATE`,
+        [targetId]
+      );
+
+      const target = records.rows[0];
+
+      if (
+        !target ||
+        target.role !== 'complainant' ||
+        target.verified ||
+        !target.active
+      ) {
+        throw new APIError(
+          409,
+          'No pending active complainant account found.'
+        );
+      }
+
+      const approved = decision === 'approve';
+
+      await tx.query(
+        `UPDATE app_users
+         SET verified = $2,
+             active = $3
+         WHERE id = $1`,
+        [targetId, approved, approved]
+      );
+
+      await tx.query(
+        `DELETE FROM auth_tokens
+         WHERE user_id = $1
+         AND purpose = 'verify'`,
+        [targetId]
+      );
+
+      await tx.query(
+        'DELETE FROM sessions WHERE user_id = $1',
+        [targetId]
+      );
+
+      await audit(
+        user.id,
+        approved
+          ? 'REGISTRATION_APPROVED'
+          : 'REGISTRATION_REJECTED',
+        targetId,
+        { reason },
+        tx
+      );
+
+    });
+
+    result = {
+      success: true,
+
+      message:
+        decision === 'approve'
+          ? 'User approved successfully.'
+          : 'User registration rejected.'
+    };
+
+  }
+
+  // =====================================================
+  // EXISTING FEATURE: USER MANAGEMENT
+  // =====================================================
+
+  else if (action === 'user_update') {
+
+    const target = (
+      await query(
+        'SELECT * FROM app_users WHERE id=$1',
+        [input.id]
+      )
+    )[0];
+
+    if (!target) {
+      throw new APIError(404, 'User not found.');
+    }
+
+    const allowedRoles = [
+      'complainant',
+      'so',
+      'da',
+      'director',
+      'chairman',
+      'admin'
+    ];
+
+    const role = input.role || target.role;
+
+    if (!allowedRoles.includes(role)) {
+      throw new APIError(400, 'Invalid role.');
+    }
+
+    if (
+      target.id === user.id &&
+      (input.active === false || role !== 'admin')
+    ) {
+      throw new APIError(
+        400,
+        'You cannot remove your own administrator access.'
+      );
+    }
+
+    const bureau = ['so', 'da', 'director'].includes(role)
+      ? input.bureau_id || target.bureau_id
+      : null;
+
+    if (
+      ['so', 'da', 'director'].includes(role) &&
+      !bureau
+    ) {
+      throw new APIError(
+        400,
+        'Assign a bureau to this officer role.'
+      );
+    }
+
+    if (
+      role === 'complainant' &&
+      !target.complainant_id
+    ) {
+      throw new APIError(
+        400,
+        'This account has no complainant identity; register a complainant account instead.'
+      );
+    }
+
+    const region =
+      input.region_id === null || input.region_id === ''
+        ? null
+        : input.region_id || target.region_id;
+
+    let officer = target.officer_id;
+
+    if (
+      ['so', 'da', 'director'].includes(role) &&
+      !officer
+    ) {
+      officer = `OFF-${target.id}`;
+    }
+
+    await (await db()).transaction(async (tx) => {
+
+      if (officer) {
+        await tx.query(
+          `INSERT INTO officers(
+            officer_id,
+            pseudonym,
+            bureau_id,
+            region_id,
+            role,
+            active,
+            on_duty_from,
+            source_type
+          )
+          VALUES(
+            $1,$2,$3,$4,$5,$6,
+            CURRENT_DATE,
+            'LIVE_DEMO'
+          )
+          ON CONFLICT(officer_id)
+          DO UPDATE SET
+            bureau_id=excluded.bureau_id,
+            region_id=excluded.region_id,
+            role=excluded.role,
+            active=excluded.active`,
+          [
+            officer,
+            target.name,
+            bureau,
+            region,
+            ({
+              so: 'Section Officer',
+              da: 'Dealing Assistant',
+              director: 'Director'
+            } as Row)[role] || 'Inactive officer',
+            input.active ?? target.active
+          ]
+        );
+      }
+
+      await tx.query(
+        `UPDATE app_users
+         SET role=$2,
+             bureau_id=$3,
+             region_id=$4,
+             active=$5,
+             officer_id=$6
+         WHERE id=$1`,
+        [
+          target.id,
+          role,
+          bureau,
+          region,
+          input.active ?? target.active,
+          officer
+        ]
+      );
+
+      if (
+        input.active === false ||
+        role !== target.role
+      ) {
+        await tx.query(
+          'DELETE FROM sessions WHERE user_id=$1',
+          [target.id]
+        );
+      }
+
+      await audit(
+        user.id,
+        'USER_UPDATED',
+        target.id,
+        {
+          role,
+          bureau,
+          region,
+          active: input.active
+        },
+        tx
+      );
+
+    });
+
+  }
+
+  // =====================================================
+  // EXISTING FEATURE: SYSTEM SETTINGS
+  // =====================================================
+
+  else if (action === 'setting_update') {
+
+    const key = String(input.key || '');
+
+    if (![
+      'duplicate_threshold',
+      'sla_warning_hours',
+      'demo_mode',
+      'replay_enabled',
+      'approval_policy',
+      'notification_templates',
+      'required_documents',
+      'institution_aliases',
+      'geographic_mapping_source'
+    ].includes(key)) {
+      throw new APIError(
+        400,
+        'This setting cannot be changed through the application.'
+      );
+    }
+
+    if (
+      key === 'duplicate_threshold' &&
+      (
+        Number(input.value) < 0.1 ||
+        Number(input.value) > 1
+      )
+    ) {
+      throw new APIError(
+        400,
+        'Threshold must be between 0.1 and 1.'
+      );
+    }
+
+    await query(
+      `INSERT INTO system_settings(key,value,updated_by)
+       VALUES($1,$2,$3)
+       ON CONFLICT(key)
+       DO UPDATE SET
+         value=excluded.value,
+         updated_by=excluded.updated_by,
+         updated_at=now()`,
+      [
+        key,
+        JSON.stringify(input.value),
+        user.id
+      ]
+    );
+
+  }
+
+  // =====================================================
+  // EXISTING FEATURE: SLA MANAGEMENT
+  // =====================================================
+
+  else if (action === 'sla_update') {
+
+    const hours = Number(input.target_hours);
+
+    if (
+      !Number.isFinite(hours) ||
+      hours < 1 ||
+      hours > 8760
+    ) {
+      throw new APIError(
+        400,
+        'SLA hours must be between 1 and 8760.'
+      );
+    }
+
+    await query(
+      `UPDATE sla_policies
+       SET target_hours=$2,
+           policy_source='ADMIN_DEMO_CONFIGURATION'
+       WHERE sla_policy_id=$1`,
+      [input.sla_policy_id, hours]
+    );
+
+    await query(
+      `UPDATE categories
+       SET proposed_sla_days=$2
+       WHERE category_id=(
+         SELECT category_id
+         FROM sla_policies
+         WHERE sla_policy_id=$1
+       )`,
+      [
+        input.sla_policy_id,
+        Math.ceil(hours / 24)
+      ]
+    );
+
+    result.message =
+      'Policy updated for future complaints. Existing deadlines preserve their submission-time policy.';
+
+  }
+
+  // =====================================================
+  // EXISTING FEATURE: ROUTING MANAGEMENT
+  // =====================================================
+
+  else if (action === 'routing_update') {
+
+    await query(
+      `UPDATE categories
+       SET default_bureau_id=$2
+       WHERE category_id=$1`,
+      [
+        input.category_id,
+        input.bureau_id
+      ]
+    );
+
+  }
+
+  // =====================================================
+  // EXISTING FEATURE: GEOGRAPHY MANAGEMENT
+  // =====================================================
+
+  else if (action === 'geography_update') {
+
+    await query(
+      `UPDATE states
+       SET region_id=$2,
+           jurisdiction_source=$3,
+           jurisdiction_current_verified=$4
+       WHERE state_code=$1`,
+      [
+        input.state_code,
+        input.region_id,
+        String(
+          input.source ||
+          'Administrator demonstration mapping'
+        ),
+        Boolean(input.verified)
+      ]
+    );
+
+  }
+
+  // =====================================================
+  // EXISTING FEATURE: SLA EXECUTION
+  // =====================================================
+
+  else if (action === 'run_sla') {
+
+    result = {
+      success: true,
+      ...await evaluateSLA()
+    };
+
+  }
+
+  // =====================================================
+  // EXISTING FEATURE: EMAIL RETRY
+  // =====================================================
+
+  else if (action === 'retry_email') {
+
+    if (!process.env.SMTP_HOST) {
+      throw new APIError(
+        409,
+        'Configure SMTP to deliver actual messages. The simulated inbox already contains local messages.'
+      );
+    }
+
+    await query(
+      `UPDATE email_outbox
+       SET status='pending',
+           attempts=0,
+           next_attempt_at=now()
+       WHERE id=$1
+       AND status IN ('failed','simulated')`,
+      [input.id]
+    );
+
+    result = {
+      success: true,
+      ...await processOutbox()
+    };
+
+  }
+
+  // =====================================================
+  // EXISTING FEATURE: TEST EMAIL
+  // =====================================================
+
+  else if (action === 'send_test_email') {
+
+    const recipient = parsed(
+      z.string().email(),
+      input.email || user.email
+    );
+
+    await queueEmail(
+      await db(),
+      { ...user, email: recipient },
+      id('TEST'),
+      'SAMADHAN | Email Transport Test',
+      'This is a synthetic demonstration transport test. Provider acceptance is logged only when SMTP accepts the message.',
+      process.env.APP_URL || 'http://localhost:3000'
+    );
+
+    result = {
+      success: true,
+      ...await processOutbox(),
+
+      message: process.env.SMTP_HOST
+        ? 'Test message queued and delivery attempted; inspect the status log.'
+        : 'Test message saved in the simulated inbox. No external email was sent.'
+    };
+
+  }
+
+  // =====================================================
+  // EXISTING FEATURE: NOTIFICATION TEMPLATES
+  // =====================================================
+
+  else if (action === 'save_template') {
+
+    const templates =
+      (await settings()).notification_templates || {};
+
+    const code = String(
+      input.code || 'STATUS_UPDATE'
+    ).slice(0, 80);
+
+    templates[code] = {
+      subject: String(
+        input.subject ||
+        'SAMADHAN | Complaint Status Update'
+      ).slice(0, 180),
+
+      message: String(
+        input.message ||
+        'A complaint status update is available.'
+      ).slice(0, 3000)
+    };
+
+    await query(
+      `INSERT INTO system_settings(key,value,updated_by)
+       VALUES('notification_templates',$1,$2)
+       ON CONFLICT(key)
+       DO UPDATE SET
+         value=excluded.value,
+         updated_by=excluded.updated_by,
+         updated_at=now()`,
+      [
+        JSON.stringify(templates),
+        user.id
+      ]
+    );
+
+  }
+
+  // =====================================================
+  // EXISTING FEATURE: DATASET IMPORT
+  // =====================================================
+
+  else if (action === 'run_import') {
+
+    const running = await query(
+      `SELECT id
+       FROM import_jobs
+       WHERE status='running'
+       AND started_at>now()-INTERVAL '1 hour'`
+    );
+
+    if (running.length) {
+      throw new APIError(
+        409,
+        'An import is already running.'
+      );
+    }
+
+    const job = id('IMP');
+
+    await query(
+      `INSERT INTO import_jobs(id,mode,status)
+       VALUES($1,'incremental prepared dataset','running')`,
+      [job]
+    );
+
+    void importPrepared(job).catch(async (e) => {
+
+      await query(
+        `UPDATE import_jobs
+         SET status='failed',
+             details=$2,
+             completed_at=now()
+         WHERE id=$1`,
+        [
+          job,
+          JSON.stringify({
+            error: e instanceof Error
+              ? e.message
+              : 'Import failed'
+          })
+        ]
+      );
+
+    });
+
+    result = {
+      success: true,
+      job_id: job,
+      message:
+        'Prepared connected dataset import started. Progress is persisted in Import Jobs.'
+    };
+
+  }
+
+  // =====================================================
+  // EXISTING FEATURE: DATA VALIDATION
+  // =====================================================
+
+  else if (action === 'validate_data') {
+
+    const violations = await query(
+      `SELECT c.complaint_id
+       FROM complaints c
+       LEFT JOIN institutions i USING(institution_id)
+       LEFT JOIN categories k USING(category_id)
+       WHERE i.institution_id IS NULL
+          OR k.category_id IS NULL
+       LIMIT 30`
+    );
+
+    result = {
+      success: violations.length === 0,
+      violations,
+
+      complaints: Number(
+        (
+          await query(
+            'SELECT count(*) n FROM complaints'
+          )
+        )[0].n
+      ),
+
+      message: violations.length
+        ? 'Referential validation found issues.'
+        : 'Database foreign-key validation passed.'
+    };
+
+  }
+
+  else {
+    throw new APIError(
+      400,
+      'Unknown administrator action.'
+    );
+  }
+
+  // =====================================================
+  // EXISTING FEATURE: ADMINISTRATOR AUDIT LOGGING
+  // =====================================================
+
+  await audit(
+    user.id,
+    `ADMIN_${action.toUpperCase()}`,
+    String(
+      input.id ||
+      input.key ||
+      input.category_id ||
+      'system'
+    ),
+    { action }
+  );
+
+  return json(result);
 }
 
 async function importPrepared(job:string){
